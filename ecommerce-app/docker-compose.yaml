@@ -1,0 +1,155 @@
+version: '3.4'
+services:
+  product-service:
+    build:
+      context: ./products
+    environment:
+      - POSTGRES_USER=product
+      - POSTGRES_PASSWORD=product_password
+      - POSTGRES_DB=product
+      - INIT_DB=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - dockercompose.env
+    depends_on:
+      - product_db
+      - redis
+    networks:
+      - app-network
+    volumes:
+      - ./products/:/app
+    ports:
+      - "5005:5005"
+
+  product_db:
+    image: postgres:11
+    env_file:
+      - dockercompose.env
+    environment:
+      - POSTGRES_USER=product
+      - POSTGRES_PASSWORD=product_password
+      - POSTGRES_DB=product
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - product_db_data2:/var/lib/postgresql/data
+    networks:
+      - app-network 
+    ports:
+      - 5432:5432
+
+  order-service:
+    build:
+      context: ./orders
+    environment:
+      - POSTGRES_USER=order
+      - POSTGRES_PASSWORD=order_password
+      - POSTGRES_DB=order
+      - INIT_DB=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - dockercompose.env
+    depends_on:
+      - order_db
+      - redis
+    networks:
+      - app-network
+    volumes:
+      - ./orders/:/app
+    ports:
+      - "5007:5007"
+
+  order_db:
+    image: postgres:11
+    env_file:
+      - dockercompose.env
+    environment:
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order_password
+      POSTGRES_DB: order
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - order_db1:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+
+  inventory-service:
+    build:
+      context: ./inventory
+    environment:
+      - POSTGRES_USER=inventory
+      - POSTGRES_PASSWORD=inventory_password
+      - POSTGRES_DB=inventory
+      - INIT_DB=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - dockercompose.env
+    depends_on:
+      - product_db
+      - product-service
+      - inventory_db
+      - redis
+    networks:
+      - app-network
+    volumes:
+      - ./inventory/:/app
+    ports:
+      - "5006:5006"
+
+  inventory_db:
+    image: postgres:11
+    env_file:
+      - dockercompose.env
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory_password
+      POSTGRES_DB: inventory
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - inventory_db3:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    networks:
+      - app-network
+
+  redis:
+    image: redis
+    entrypoint:
+      - bash
+      - -c
+    command:
+      - "redis-server --masterauth $${REDIS_PASS} --requirepass $${REDIS_PASS}"
+    env_file:
+      - dockercompose.env
+    volumes:
+      - redis_data:/data
+    ports:
+      - 0.0.0.0:6379:6379
+    networks:
+      - app-network
+
+volumes:
+  product_db_data2:
+  order_db1:
+  inventory_db3:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge

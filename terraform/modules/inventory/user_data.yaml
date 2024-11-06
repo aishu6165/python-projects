@@ -1,0 +1,8 @@
+#!/bin/bash
+apt update -y
+apt install docker.io -y
+systemctl start docker
+docker run -d -p 5006:5006 \
+-e REDIS_URL=${redis_url} \
+-e DB_HOST=${db_host} \
+${ecr_url}/inventory-service:latest

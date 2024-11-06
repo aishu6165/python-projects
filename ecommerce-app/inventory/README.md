@@ -1,0 +1,1 @@
+Inventory Service: Manages inventory levels and handles stock updates when orders are placed.

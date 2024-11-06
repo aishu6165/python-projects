@@ -1,0 +1,1 @@
+Orders Service: Processes orders and checks product availability via the Inventory Service.

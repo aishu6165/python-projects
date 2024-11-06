@@ -1,0 +1,1 @@
+Product Service: Handles product catalog management (CRUD).

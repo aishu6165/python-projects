@@ -1,0 +1,8 @@
+#!/bin/bash
+apt update -y
+apt install docker.io -y
+systemctl start docker
+docker run -d -p 5007:5007 \
+-e REDIS_URL=${redis_url} \
+-e DB_HOST=${db_host} \
+${ecr_url}/orders-service:latest

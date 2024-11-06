@@ -1,0 +1,7 @@
+FROM python:3.9-slim
+WORKDIR /app
+COPY . /app
+RUN pip install --no-cache-dir -r requirements.txt && \
+    echo "Installed packages:" && pip freeze 
+EXPOSE 5007
+CMD ["python", "app.py"]
