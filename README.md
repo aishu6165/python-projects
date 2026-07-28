@@ -331,6 +331,5 @@ This challenge is designed to be completed in approximately **8-10 hours**. Bonu
 
 - **Instructions**:
   - Ensure the README file is clear and helps in running the application without issues.
----
 
-**Good luck, and we look forward to reviewing your solution!**
+
